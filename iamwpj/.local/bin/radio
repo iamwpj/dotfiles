@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Provided by Evan Hahn
+# https://codeberg.org/EvanHahn/dotfiles/src/commit/f7a9d94ae2254cb7e5f67e6e5bdb74b6467f6dec/home/bin/bin/radio
+# 
+# "
+#   `radio` is a little wrapper around some of my favorite internet radio stations.
+#   `radio lofi` and `radio salsa` are two of my favorites. 
+#   I use this a few times a month.
+# "
+#
+
+station=${STATION:-$1}
+declare -A stations=(
+  [lofi]='https://live.hunter.fm/lofi_low'
+  [trance]='http://ubuntu.hbr1.com:19800/trance.ogg'
+  [salsa]='https://latinasalsa.ice.infomaniak.ch/latinasalsa.mp3'
+  [kfai]='https://kfai.broadcasttool.stream/kfai-1'
+  [holiday]='https://radio1.streamserver.link/radio/8070/hcr-aac'
+  [ipr]='https://news-stream.iowapublicradio.org/News.mp3'
+  [classical]='https://classical-stream.iowapublicradio.org/Classical.mp3'
+  [hits]='https://ice23.securenetsystems.net/KWAR?playSessionID=F4A95333-C26D-A8A6-B16A735CB2142FCE'
+  [indie]='https://kathy.torontocast.com:2145/stream'
+  [jazz]='https://das-edge14-live365-dal02.cdnstream.com/a73229'
+  [youtube]='Provide a search term and I will play the first video that matches.'
+)
+
+function options {
+  echo -e "Your options are: $(printf "\n - %s" "${!stations[@]}")\n"
+}
+
+function play_from_yt() {
+  search="$1"
+  vid=$(yt-dlp ytsearch1:"$search" --get-id --extract-audio)
+  mpv \
+    --display-tags='' \
+    --no-video \
+    --term-playing-msg='Title: ${media-title}' \
+    "ytdl://youtube.com/watch?v=$vid"
+}
+
+if [ -z "$station" ]; then
+  echo "You didn't provide a station!" 1>&2
+  options
+  exit 1
+elif [[ "$station" == 'youtube' ]]; then
+  play_from_yt "$2" 
+elif [[ ! -v stations[$station] ]]; then
+  echo "I don't know about $station" 1>&2
+  options
+  exit 1
+else
+  echo "Playing $station from ${stations[$station]}"
+  mpv \
+    "${stations[$station]}"
+fi
+
