@@ -73,7 +73,18 @@ call plug#begin()
   Plug 'othree/html5.vim'             " HTML5
   Plug 'ycm-core/YouCompleteMe'       " true love
   Plug 'vim-syntastic/syntastic'      " Get that syntax
+  Plug 'prabirshrestha/vim-lsp'       " LSP!
 call plug#end()
 
 set background=dark
 colorscheme rosepine_moon
+
+" Set up LSPs
+if executable('ruff')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'ruff',
+        \ 'cmd': {server_info->['ruff', 'server']},
+        \ 'allowlist': ['python'],
+        \ 'workspace_config': {},
+        \ })
+endif
